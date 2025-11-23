@@ -1,6 +1,7 @@
 package com.example.funding.dto.request.admin;
 
 import com.example.funding.enums.ProjectStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,10 +10,15 @@ import java.util.List;
 
 @Getter
 @Setter
+@Schema(name = "SearchAdminProjectDto", description = "관리자 프로젝트 검색 DTO")
 public class SearchAdminProjectDto {
+    @Schema(description = "프로젝트 상태 목록")
     private List<ProjectStatus> projectStatus;
+    @Schema(description = "시작 날짜", example = "2024-01-01")
     private LocalDate fromDate;
+    @Schema(description = "종료 날짜", example = "2024-12-31")
     private LocalDate toDate;
+    @Schema(description = "사전 정의된 기간 유형 (예: '7d', '30d', '90d')", example = "30d")
     private String rangeType;
 
     public void applyRangeType() {
