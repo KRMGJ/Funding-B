@@ -37,6 +37,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -54,6 +55,7 @@ import java.util.List;
 import static com.example.funding.common.Utils.monthsInt;
 import static com.example.funding.common.Utils.resolveWindow;
 
+@Tag(name = "Admin Controller", description = "관리자 관련 API")
 @RestController
 //@PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/v1/admin")
