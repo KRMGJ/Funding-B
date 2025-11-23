@@ -1,6 +1,7 @@
 package com.example.funding.handler;
 
 import com.example.funding.exception.BusinessException;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanCreationException;
@@ -413,15 +414,21 @@ public class GlobalExceptionHandler {
     }
 
     /* ===== 공통 응답 모델 ===== */
+    @Schema(description = "공통 에러 응답")
     public record ApiError(
+            @Schema(description = "에러 발생 시각", example = "2025-08-27T12:34:56.789Z")
             Instant timestamp,
+            @Schema(description = "HTTP 상태 코드", example = "400")
             int status,
+            @Schema(description = "HTTP 상태 문자열", example = "Bad Request")
             String error,
+            @Schema(description = "에러 메시지", example = "요청 값이 유효하지 않습니다.")
             String message,
+            @Schema(description = "요청 경로", example = "/api/v1/user/loginUser")
             String path,
-            Object details // 검증 오류 목록 등 부가정보(없으면 null)
-    ) {
-    }
+            @Schema(description = "추가 상세 정보(필드 오류 등)", nullable = true)
+            Object details
+    ) {}
 
     public record FieldViolation(String field, String message, Object rejectedValue) {
     }

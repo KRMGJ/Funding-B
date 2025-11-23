@@ -1,15 +1,22 @@
 package com.example.funding.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "공통 응답 DTO")
 public class ResponseDto<T> {
+    @Schema(description = "응답 코드", example = "200")
     private int code;
+    @Schema(description = "응답 메시지", example = "성공")
     private String message;
+    @Schema(description = "응답 데이터")
     private T data;
 
     /**
