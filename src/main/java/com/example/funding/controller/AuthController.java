@@ -6,22 +6,24 @@ import com.example.funding.dto.request.auth.CheckEmailRequestDto;
 import com.example.funding.dto.request.auth.CheckNicknameRequestDto;
 import com.example.funding.dto.request.auth.SignInRequestDto;
 import com.example.funding.dto.request.auth.SignUpRequestDto;
-import com.example.funding.exception.badrequest.InvalidCredentialsException;
-import com.example.funding.exception.conflict.DuplicatedAdminIdException;
-import com.example.funding.exception.conflict.DuplicatedEmailException;
-import com.example.funding.exception.conflict.DuplicatedNicknameException;
-import com.example.funding.exception.forbidden.InvalidAdminCredentialsException;
+import com.example.funding.handler.GlobalExceptionHandler;
 import com.example.funding.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Auth Controller", description = "인증 관련 API")
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -30,88 +32,129 @@ public class AuthController {
 
     private final AuthService authService;
 
-    /**
-     * <p>회원가입</p>
-     *
-     * @param dto 가입 정보
-     * @return 이메일
-     * @throws DuplicatedEmailException 이미 존재하는 이메일인 경우
-     * @author by: 장민규
-     * @since 2025-08-26
-     */
+    @Operation(summary = "회원가입", description = "사용자 회원가입을 처리합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "회원가입 성공", content = {
+                    @Content(schema = @Schema(implementation = ResponseDto.class))
+            }),
+            @ApiResponse(responseCode = "409", description = "이미 존재하는 이메일", content = {
+                    @Content(schema = @Schema(implementation = GlobalExceptionHandler.ApiError.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = {
+                    @Content(schema = @Schema(implementation = GlobalExceptionHandler.ApiError.class))
+            })
+    })
     @PostMapping("/signUp")
-    public ResponseEntity<ResponseDto<String>> signUp(@Valid @RequestBody SignUpRequestDto dto) {
+    public ResponseEntity<ResponseDto<String>> signUp(@io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "회원가입 정보",
+            required = true,
+            content = @Content(schema = @Schema(implementation = SignUpRequestDto.class))
+    ) @Valid @RequestBody SignUpRequestDto dto) {
         return authService.signUp(dto);
     }
 
-    /**
-     * <p>로그인</p>
-     *
-     * @param dto 로그인 정보
-     * @return JWT 토큰
-     * @throws InvalidCredentialsException 이메일 또는 비밀번호가 올바르지 않은 경우
-     * @author by: 장민규
-     * @since 2025-08-26
-     */
+    @Operation(summary = "로그인", description = "사용자 로그인을 처리합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "로그인 성공. JWT 토큰 발급", content = {
+                    @Content(schema = @Schema(implementation = ResponseDto.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "잘못된 인증 정보", content = {
+                    @Content(schema = @Schema(implementation = GlobalExceptionHandler.ApiError.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = {
+                    @Content(schema = @Schema(implementation = GlobalExceptionHandler.ApiError.class))
+            })
+    })
     @PostMapping("/signIn")
-    public ResponseEntity<ResponseDto<String>> signIn(@Valid @RequestBody SignInRequestDto dto) {
+    public ResponseEntity<ResponseDto<String>> signIn(@io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "로그인 정보",
+            required = true,
+            content = @Content(schema = @Schema(implementation = SignInRequestDto.class))
+    ) @Valid @RequestBody SignInRequestDto dto) {
         return authService.signIn(dto);
     }
 
-    /**
-     * <p>이메일 중복 확인</p>
-     *
-     * @param dto 이메일 정보
-     * @return 이메일
-     * @throws DuplicatedEmailException 이미 존재하는 이메일인 경우
-     * @author by: 장민규
-     * @since 2025-08-27
-     */
+    @Operation(summary = "이메일 중복 확인", description = "이메일 중복 확인을 처리합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "이메일 사용 가능", content = {
+                    @Content(schema = @Schema(implementation = ResponseDto.class))
+            }),
+            @ApiResponse(responseCode = "409", description = "이미 존재하는 이메일", content = {
+                    @Content(schema = @Schema(implementation = GlobalExceptionHandler.ApiError.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = {
+                    @Content(schema = @Schema(implementation = GlobalExceptionHandler.ApiError.class))
+            })
+    })
     @PostMapping("/checkEmail")
-    public ResponseEntity<ResponseDto<String>> checkEmail(@Valid @RequestBody CheckEmailRequestDto dto) {
+    public ResponseEntity<ResponseDto<String>> checkEmail(@io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "이메일 정보",
+            required = true,
+            content = @Content(schema = @Schema(implementation = CheckEmailRequestDto.class))
+    ) @Valid @RequestBody CheckEmailRequestDto dto) {
         return authService.checkEmail(dto);
     }
 
-    /**
-     * <p>닉네임 중복 확인</p>
-     *
-     * @param dto 닉네임 정보
-     * @return 닉네임
-     * @throws DuplicatedNicknameException 이미 존재하는 닉네임인 경우
-     * @author by: 장민규
-     * @since 2025-08-27
-     */
+    @Operation(summary = "닉네임 중복 확인", description = "닉네임 중복 확인을 처리합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "닉네임 사용 가능", content = {
+                    @Content(schema = @Schema(implementation = ResponseDto.class))
+            }),
+            @ApiResponse(responseCode = "409", description = "이미 존재하는 닉네임", content = {
+                    @Content(schema = @Schema(implementation = GlobalExceptionHandler.ApiError.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = {
+                    @Content(schema = @Schema(implementation = GlobalExceptionHandler.ApiError.class))
+            })
+    })
     @PostMapping("/checkNickname")
-    public ResponseEntity<ResponseDto<String>> checkNickname(@Valid @RequestBody CheckNicknameRequestDto dto) {
+    public ResponseEntity<ResponseDto<String>> checkNickname(@io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "닉네임 정보",
+            required = true,
+            content = @Content(schema = @Schema(implementation = CheckNicknameRequestDto.class))
+    ) @Valid @RequestBody CheckNicknameRequestDto dto) {
         return authService.checkNickname(dto);
     }
 
-    /**
-     * <p>관리자 회원가입</p>
-     *
-     * @param dto 가입 정보
-     * @return 관리자 아이디
-     * @throws DuplicatedAdminIdException 이미 존재하는 관리자 아이디인 경우
-     * @author by: 장민규
-     * @since 2025-08-27
-     */
+    @Operation(summary = "관리자 회원가입", description = "관리자 회원가입을 처리합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "관리자 회원가입 성공", content = {
+                    @Content(schema = @Schema(implementation = ResponseDto.class))
+            }),
+            @ApiResponse(responseCode = "409", description = "이미 존재하는 관리자 아이디", content = {
+                    @Content(schema = @Schema(implementation = GlobalExceptionHandler.ApiError.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = {
+                    @Content(schema = @Schema(implementation = GlobalExceptionHandler.ApiError.class))
+            })
+    })
     @PostMapping("/registerAdmin")
-    public ResponseEntity<ResponseDto<String>> registerAdmin(@Valid @RequestBody RegisterAdminRequestDto dto) {
+    public ResponseEntity<ResponseDto<String>> registerAdmin(@io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "관리자 회원가입 정보",
+            required = true,
+            content = @Content(schema = @Schema(implementation = RegisterAdminRequestDto.class))
+    ) @Valid @RequestBody RegisterAdminRequestDto dto) {
         return authService.registerAdmin(dto);
     }
 
-    /**
-     * <p>관리자 로그인</p>
-     *
-     * @param dto 로그인 정보
-     * @return JWT 토큰
-     * @throws DuplicatedAdminIdException 관리자 아이디가 존재하지 않는 경우
-     * @throws InvalidAdminCredentialsException 관리자 아이디 또는 비밀번호가 올바르지 않은 경우
-     * @author by: 장민규
-     * @since 2025-10-14
-     */
+    @Operation(summary = "관리자 로그인", description = "관리자 로그인을 처리합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "관리자 로그인 성공. JWT 토큰 발급", content = {
+                    @Content(schema = @Schema(implementation = ResponseDto.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "잘못된 관리자 인증 정보", content = {
+                    @Content(schema = @Schema(implementation = GlobalExceptionHandler.ApiError.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = {
+                    @Content(schema = @Schema(implementation = GlobalExceptionHandler.ApiError.class))
+            })
+    })
     @PostMapping("/loginAdmin")
-    public ResponseEntity<ResponseDto<String>> loginAdmin(@Valid @RequestBody RegisterAdminRequestDto dto) {
+    public ResponseEntity<ResponseDto<String>> loginAdmin(@io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "관리자 로그인 정보",
+            required = true,
+            content = @Content(schema = @Schema(implementation = RegisterAdminRequestDto.class))
+    ) @Valid @RequestBody RegisterAdminRequestDto dto) {
         return authService.loginAdmin(dto);
     }
 }
